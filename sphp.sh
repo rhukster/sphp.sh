@@ -1,6 +1,8 @@
 #!/bin/bash
 # Creator: Phil Cook
 # Modified: Andy Miller
+# More information: https://github.com/rhukster/sphp.sh
+
 osx_major_version=$(sw_vers -productVersion | cut -d. -f1)
 osx_minor_version=$(sw_vers -productVersion | cut -d. -f2)
 osx_patch_version=$(sw_vers -productVersion | cut -d. -f3)

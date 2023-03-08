@@ -1,6 +1,12 @@
 #!/bin/bash
+# Shell script for switching between Brew-installed PHP versions
+#
+# Copyright (c) 2023 Andy Miller
+# Released under the MIT License
+#
 # Creator: Phil Cook
 # Modified: Andy Miller
+#
 # More information: https://github.com/rhukster/sphp.sh
 
 osx_major_version=$(sw_vers -productVersion | cut -d. -f1)

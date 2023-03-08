@@ -58,6 +58,13 @@ apache_module_and_lib() {
 }
 
 
+# Make sure we call macOS native grep.
+# This avoids warnings when GNU grep >=3.8+ is installed (see #1)
+grep() {
+    /usr/bin/grep "$@"
+}
+
+
 # ----------------------------------------------------------------------------
 # Main script
 #

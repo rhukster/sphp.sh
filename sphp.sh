@@ -9,6 +9,9 @@
 #
 # More information: https://github.com/rhukster/sphp.sh
 
+
+script_version=1.1.0
+
 osx_major_version=$(sw_vers -productVersion | cut -d. -f1)
 osx_minor_version=$(sw_vers -productVersion | cut -d. -f2)
 osx_patch_version=$(sw_vers -productVersion | cut -d. -f3)
@@ -37,7 +40,11 @@ fi
 
 # Has the user submitted a version required
 if [[ -z "$1" ]]; then
-    echo "usage: sphp version [-s|-s=*] [-c=*]"
+    echo "PHP Switcher - v$script_version"
+    echo
+    echo "Switch between Brew-installed PHP versions."
+    echo
+    echo "usage: $(basename "$0") version [-s|-s=*] [-c=*]"
     echo
     echo "    version    one of:" "${brew_array[@]}"
     echo

@@ -12,6 +12,9 @@
 
 script_version=1.1.0
 
+# Supported PHP versions
+brew_array=("5.6" "7.0" "7.1" "7.2" "7.3" "7.4" "8.0" "8.1" "8.2")
+
 
 # ----------------------------------------------------------------------------
 # Helper functions
@@ -47,9 +50,6 @@ fi
 homebrew_path=$(brew --prefix)
 brew_prefix=$(brew --prefix | sed 's#/#\\\/#g')
 
-brew_array=("5.6" "7.0" "7.1" "7.2" "7.3" "7.4" "8.0" "8.1" "8.2")
-php_array=("php@5.6" "php@7.0" "php@7.1" "php@7.2" "php@7.3" "php@7.4" "php@8.0" "php@8.1" "php@8.2")
-php_installed_array=()
 php_version="php@$1"
 php_opt_path="$brew_prefix\/opt\/"
 
@@ -82,25 +82,26 @@ apache_change=1
 apache_conf_path="$homebrew_path/etc/httpd/httpd.conf"
 apache_php_mod_path="$php_opt_path$php_version$apache_php_lib_path"
 
-# What versions of php are installed via brew
-for i in ${php_array[*]}; do
-    # Remove 'php@' prefix
-    version=${i#php@}
+# Build 2 arrays from the list of supported PHP versions:
+# - php_array: PHP version numbers prefixed by 'php@'
+# - php_installed_array: PHP versions actually installed on the system via brew
+for version in ${brew_array[*]}; do
+    php_array+=("php@${version}")
     if [[ -d "$homebrew_path/etc/php/$version" ]]; then
-        php_installed_array+=("$i")
+        php_installed_array+=("$version")
     fi
 done
 
 # Check that the requested version is supported
 if [[ " ${php_array[*]} " == *"$php_version"* ]]; then
     # Check that the requested version is installed
-    if [[ " ${php_installed_array[*]} " == *"$php_version"* ]]; then
+    if [[ " ${php_installed_array[*]} " == *"$1"* ]]; then
 
         # Switch Shell
         echo "Switching to $php_version"
         echo "Switching your shell"
         for i in "${php_installed_array[@]}"; do
-            brew unlink "$i"
+            brew unlink "php@$i"
         done
         brew link --force "$php_version"
 

@@ -69,8 +69,10 @@ grep() {
 # Main script
 #
 
+target_version=$1
+
 # Display help and exit if the user did not specify a version
-if [[ -z "$1" ]]; then
+if [[ -z "$target_version" ]]; then
     echo "PHP Switcher - v$script_version"
     echo
     echo "Switch between Brew-installed PHP versions."
@@ -85,7 +87,7 @@ fi
 homebrew_path=$(brew --prefix)
 brew_prefix=$(brew --prefix | sed 's#/#\\\/#g')
 
-php_version="php@$1"
+php_version="php@$target_version"
 php_opt_path="$brew_prefix\/opt\/"
 
 if [[ $(osx_version) -ge 101300 ]]; then
@@ -95,7 +97,7 @@ else
 fi
 
 # Get PHP Module and Apache lib path for PHP version
-read -r php_module apache_php_lib_path < <(apache_module_and_lib "$1")
+read -r php_module apache_php_lib_path < <(apache_module_and_lib "$target_version")
 
 apache_change=1
 apache_conf_path="$homebrew_path/etc/httpd/httpd.conf"
@@ -114,7 +116,7 @@ done
 # Check that the requested version is supported
 if [[ " ${php_array[*]} " == *"$php_version"* ]]; then
     # Check that the requested version is installed
-    if [[ " ${php_installed_array[*]} " == *"$1"* ]]; then
+    if [[ " ${php_installed_array[*]} " == *"$target_version"* ]]; then
 
         # Switch Shell
         echo "Switching to $php_version"

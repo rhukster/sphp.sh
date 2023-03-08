@@ -12,6 +12,19 @@
 
 script_version=1.1.0
 
+# Display help and exit if the user did not specify a version
+if [[ -z "$1" ]]; then
+    echo "PHP Switcher - v$script_version"
+    echo
+    echo "Switch between Brew-installed PHP versions."
+    echo
+    echo "usage: $(basename "$0") version [-s|-s=*] [-c=*]"
+    echo
+    echo "    version    one of:" "${brew_array[@]}"
+    echo
+    exit
+fi
+
 osx_major_version=$(sw_vers -productVersion | cut -d. -f1)
 osx_minor_version=$(sw_vers -productVersion | cut -d. -f2)
 osx_patch_version=$(sw_vers -productVersion | cut -d. -f3)
@@ -36,19 +49,6 @@ apache_php8_lib_path="\/lib\/httpd\/modules\/libphp.so"
 native_osx_php_apache_module="LoadModule ${php5_module} libexec\/apache2\/libphp5.so"
 if [ "${osx_version}" -ge "101300" ]; then
     native_osx_php_apache_module="LoadModule ${php7_module} libexec\/apache2\/libphp7.so"
-fi
-
-# Has the user submitted a version required
-if [[ -z "$1" ]]; then
-    echo "PHP Switcher - v$script_version"
-    echo
-    echo "Switch between Brew-installed PHP versions."
-    echo
-    echo "usage: $(basename "$0") version [-s|-s=*] [-c=*]"
-    echo
-    echo "    version    one of:" "${brew_array[@]}"
-    echo
-    exit
 fi
 
 php_module="$php5_module"

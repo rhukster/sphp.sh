@@ -15,6 +15,14 @@ script_version=1.1.0
 # Supported PHP versions
 brew_array=("5.6" "7.0" "7.1" "7.2" "7.3" "7.4" "8.0" "8.1" "8.2")
 
+# Reference arrays defining PHP module and Apache library path per PHP version
+php_modules[5]="php5_module"
+php_modules[7]="php7_module"
+php_modules[8]="php_module"
+apache_lib_paths[5]="\/lib\/httpd\/modules\/libphp5.so"
+apache_lib_paths[7]="\/lib\/httpd\/modules\/libphp7.so"
+apache_lib_paths[8]="\/lib\/httpd\/modules\/libphp.so"
+
 
 # ----------------------------------------------------------------------------
 # Helper functions
@@ -27,6 +35,26 @@ brew_array=("5.6" "7.0" "7.1" "7.2" "7.3" "7.4" "8.0" "8.1" "8.2")
 osx_version() {
     IFS='.' read -r major minor patch < <(sw_vers -productVersion)
     echo $((major * 10000 + minor * 100 + ${patch:-0}))
+}
+
+
+# Returns the following values based on PHP version
+# - PHP module
+# - Apache PHP Library path
+#
+# Parameters:
+# $1 = PHP version ('X.Y' or 'php@X.Y')
+#
+# Example usage (to assign 'module' and 'libpath' variables):
+# read -r module libpath < <(apache_module_and_lib "<PHP version>")
+apache_module_and_lib() {
+    # Remove 'php@' prefix if present
+    version="${1#php@}"
+    # Keep only major version number (remove first '.' and everything after)
+    major="${version%%.*}"
+
+    # Lookup values in reference arrays for major PHP version number
+    echo ${php_modules[$major]} ${apache_lib_paths[$major]}
 }
 
 
@@ -53,30 +81,14 @@ brew_prefix=$(brew --prefix | sed 's#/#\\\/#g')
 php_version="php@$1"
 php_opt_path="$brew_prefix\/opt\/"
 
-php5_module="php5_module"
-apache_php5_lib_path="\/lib\/httpd\/modules\/libphp5.so"
-php7_module="php7_module"
-apache_php7_lib_path="\/lib\/httpd\/modules\/libphp7.so"
-php8_module="php_module"
-apache_php8_lib_path="\/lib\/httpd\/modules\/libphp.so"
-
 if [[ $(osx_version) -ge 101300 ]]; then
-    native_osx_php_apache_module="LoadModule ${php7_module} libexec\/apache2\/libphp7.so"
+    native_osx_php_apache_module="LoadModule ${php_modules[7]} libexec\/apache2\/libphp7.so"
 else
-    native_osx_php_apache_module="LoadModule ${php5_module} libexec\/apache2\/libphp5.so"
+    native_osx_php_apache_module="LoadModule ${php_modules[5]} libexec\/apache2\/libphp5.so"
 fi
 
-php_module="$php5_module"
-apache_php_lib_path="$apache_php5_lib_path"
-
-simple_php_version=$(echo "$php_version" | sed 's/^php@//' | sed 's/\.//')
-if [[ simple_php_version -ge 70 && simple_php_version -lt 80 ]]; then
-    php_module="$php7_module"
-    apache_php_lib_path="$apache_php7_lib_path"
-elif [[ simple_php_version -ge 80 ]]; then  
-    php_module="$php8_module"
-    apache_php_lib_path="$apache_php8_lib_path"
-fi
+# Get PHP Module and Apache lib path for PHP version
+read -r php_module apache_php_lib_path < <(apache_module_and_lib "$1")
 
 apache_change=1
 apache_conf_path="$homebrew_path/etc/httpd/httpd.conf"
@@ -110,16 +122,9 @@ if [[ " ${php_array[*]} " == *"$php_version"* ]]; then
             echo "Switching your apache conf"
 
             for j in "${php_installed_array[@]}"; do
-                loop_php_module="$php5_module"
-                loop_apache_php_lib_path="$apache_php5_lib_path"
-                loop_php_version=$(echo "$j" | sed 's/^php@//' | sed 's/\.//')
-                if [[ loop_php_version -ge 70 && loop_php_version -lt 80 ]]; then
-                    loop_php_module="$php7_module"
-                    loop_apache_php_lib_path="$apache_php7_lib_path"
-                elif [[ loop_php_version -ge 80 ]]; then  
-                    loop_php_module="$php8_module"
-                    loop_apache_php_lib_path="$apache_php8_lib_path" 
-                fi
+                # Get PHP Module and Apache lib path for PHP version
+                read -r loop_php_module loop_apache_php_lib_path < <(apache_module_and_lib "$j")
+
                 apache_module_string="LoadModule $loop_php_module $php_opt_path$j$loop_apache_php_lib_path"
                 comment_apache_module_string="#$apache_module_string"
 

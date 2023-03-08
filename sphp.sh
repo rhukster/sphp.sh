@@ -12,6 +12,25 @@
 
 script_version=1.1.0
 
+
+# ----------------------------------------------------------------------------
+# Helper functions
+#
+
+# Returns macOS version in numeric format
+# e.g. 11.7 = 110700, 12.6.3 = 120603
+# Note: will cause syntax error if version number returned by sw_vers has
+# more than 3 elements.
+osx_version() {
+    IFS='.' read -r major minor patch < <(sw_vers -productVersion)
+    echo $((major * 10000 + minor * 100 + ${patch:-0}))
+}
+
+
+# ----------------------------------------------------------------------------
+# Main script
+#
+
 # Display help and exit if the user did not specify a version
 if [[ -z "$1" ]]; then
     echo "PHP Switcher - v$script_version"
@@ -25,11 +44,6 @@ if [[ -z "$1" ]]; then
     exit
 fi
 
-osx_major_version=$(sw_vers -productVersion | cut -d. -f1)
-osx_minor_version=$(sw_vers -productVersion | cut -d. -f2)
-osx_patch_version=$(sw_vers -productVersion | cut -d. -f3)
-osx_patch_version=${osx_patch_version:-0}
-osx_version=$((osx_major_version * 10000 + osx_minor_version * 100 + osx_patch_version))
 homebrew_path=$(brew --prefix)
 brew_prefix=$(brew --prefix | sed 's#/#\\\/#g')
 
@@ -46,9 +60,10 @@ apache_php7_lib_path="\/lib\/httpd\/modules\/libphp7.so"
 php8_module="php_module"
 apache_php8_lib_path="\/lib\/httpd\/modules\/libphp.so"
 
-native_osx_php_apache_module="LoadModule ${php5_module} libexec\/apache2\/libphp5.so"
-if [ "${osx_version}" -ge "101300" ]; then
+if [[ $(osx_version) -ge 101300 ]]; then
     native_osx_php_apache_module="LoadModule ${php7_module} libexec\/apache2\/libphp7.so"
+else
+    native_osx_php_apache_module="LoadModule ${php5_module} libexec\/apache2\/libphp5.so"
 fi
 
 php_module="$php5_module"

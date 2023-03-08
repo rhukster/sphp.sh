@@ -70,6 +70,7 @@ grep() {
 #
 
 target_version=$1
+php_version="php@$target_version"
 
 # Display help and exit if the user did not specify a version
 if [[ -z "$target_version" ]]; then
@@ -86,8 +87,6 @@ fi
 
 homebrew_path=$(brew --prefix)
 brew_prefix=$(brew --prefix | sed 's#/#\\\/#g')
-
-php_version="php@$target_version"
 php_opt_path="$brew_prefix\/opt\/"
 
 if [[ $(osx_version) -ge 101300 ]]; then

@@ -127,6 +127,9 @@ if [[ " ${brew_array[*]} " == *"$target_version"* ]]; then
         if [[ $apache_change -eq 1 ]]; then
             echo "Switching your apache conf"
 
+            # Backup apache config file
+            cp "$apache_conf_path" "$apache_conf_path".bak-sphp
+
             # Disable module for any PHP version other than target
             for version in "${php_installed_array[@]}"; do
                 # Get PHP Module and Apache lib path for PHP version

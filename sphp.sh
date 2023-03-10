@@ -143,11 +143,17 @@ if [[ " ${brew_array[*]} " == *"$target_version"* ]]; then
                     # Comment out the Apache module string if not done already
                     sed -i.bak "/^$apache_module_string/s/^.*\$/#&/" "$apache_conf_path"
                 else
-                    # The string for the php module is not in the apache config then add it
-                    native_osx_php_apache_module="LoadModule ${php_modules[$osx_php_version]} ${osx_native_lib_paths[$osx_php_version]}"
-                    sed -i.bak "/$native_osx_php_apache_module/a\\
+                    # The string for the php module is not in the Apache config
+                    # Add it after rewrite_module, which is expected to be the last
+                    # module in the list according to
+                    # https://getgrav.org/blog/macos-ventura-apache-multiple-php-versions
+                    sed -i.bak "/LoadModule rewrite_module/a\\
 #$apache_module_string\\
 " "$apache_conf_path"
+#                    native_osx_php_apache_module="LoadModule ${php_modules[$osx_php_version]} ${osx_native_lib_paths[$osx_php_version]}"
+#                    sed -i.bak '' "/$native_osx_php_apache_module/a\\
+##$apache_module_string\\
+#" "$apache_conf_path"
                 fi
             done
 

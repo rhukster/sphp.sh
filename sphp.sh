@@ -25,23 +25,11 @@ php_modules[8]="php_module"
 apache_lib_paths[5]="\/lib\/httpd\/modules\/libphp5.so"
 apache_lib_paths[7]="\/lib\/httpd\/modules\/libphp7.so"
 apache_lib_paths[8]="\/lib\/httpd\/modules\/libphp.so"
-osx_native_lib_paths[5]="libexec\/apache2\/libphp5.so"
-osx_native_lib_paths[7]="libexec\/apache2\/libphp7.so"
 
 
 # ----------------------------------------------------------------------------
 # Helper functions
 #
-
-# Returns macOS version in numeric format
-# e.g. 11.7 = 110700, 12.6.3 = 120603
-# Note: will cause syntax error if version number returned by sw_vers has
-# more than 3 elements.
-osx_version() {
-    IFS='.' read -r major minor patch < <(sw_vers -productVersion)
-    echo $((major * 10000 + minor * 100 + ${patch:-0}))
-}
-
 
 # Returns the following values based on PHP version
 # - PHP module
@@ -95,13 +83,6 @@ apache_conf_path="$homebrew_path/etc/httpd/httpd.conf"
 brew_prefix=$(brew --prefix | sed 's#/#\\\/#g')
 php_opt_path="$brew_prefix\/opt\/"
 
-if [[ $(osx_version) -ge 101300 ]]; then
-    osx_php_version=7
-else
-    osx_php_version=5
-fi
-
-
 # From the list of supported PHP versions, build array of PHP versions actually
 # installed on the system via brew
 for version in ${brew_array[*]}; do
@@ -150,10 +131,6 @@ if [[ " ${brew_array[*]} " == *"$target_version"* ]]; then
                     sed -i.bak "/LoadModule rewrite_module/a\\
 #$apache_module_string\\
 " "$apache_conf_path"
-#                    native_osx_php_apache_module="LoadModule ${php_modules[$osx_php_version]} ${osx_native_lib_paths[$osx_php_version]}"
-#                    sed -i.bak '' "/$native_osx_php_apache_module/a\\
-##$apache_module_string\\
-#" "$apache_conf_path"
                 fi
             done
 

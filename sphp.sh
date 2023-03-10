@@ -15,6 +15,9 @@ script_version=1.1.0
 # Supported PHP versions
 brew_array=("5.6" "7.0" "7.1" "7.2" "7.3" "7.4" "8.0" "8.1" "8.2")
 
+# Apache configuration switch: 1=enabled, 0=disabled
+apache_change=1
+
 # Reference arrays defining PHP module and Apache library path per PHP version
 php_modules[5]="php5_module"
 php_modules[7]="php7_module"
@@ -98,7 +101,6 @@ fi
 # Get PHP Module and Apache lib path for PHP version
 read -r php_module apache_php_lib_path < <(apache_module_and_lib "$target_version")
 
-apache_change=1
 apache_conf_path="$homebrew_path/etc/httpd/httpd.conf"
 apache_php_mod_path="$php_opt_path$php_version$apache_php_lib_path"
 

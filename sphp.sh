@@ -22,9 +22,9 @@ apache_change=1
 php_modules[5]="php5_module"
 php_modules[7]="php7_module"
 php_modules[8]="php_module"
-apache_lib_paths[5]="\/lib\/httpd\/modules\/libphp5.so"
-apache_lib_paths[7]="\/lib\/httpd\/modules\/libphp7.so"
-apache_lib_paths[8]="\/lib\/httpd\/modules\/libphp.so"
+apache_lib_paths[5]="/lib/httpd/modules/libphp5.so"
+apache_lib_paths[7]="/lib/httpd/modules/libphp7.so"
+apache_lib_paths[8]="/lib/httpd/modules/libphp.so"
 
 
 # ----------------------------------------------------------------------------
@@ -58,6 +58,14 @@ grep() {
 }
 
 
+# Escaping a path for use in shell command
+# Adds a '\' before '/'
+sed_escape() {
+  string="$*"
+  echo "${string//\//\\/}"
+}
+
+
 # ----------------------------------------------------------------------------
 # Main script
 #
@@ -80,8 +88,7 @@ fi
 
 homebrew_path=$(brew --prefix)
 apache_conf_path="$homebrew_path/etc/httpd/httpd.conf"
-brew_prefix=$(brew --prefix | sed 's#/#\\\/#g')
-php_opt_path="$brew_prefix\/opt\/"
+php_opt_path="$homebrew_path/opt/"
 
 # From the list of supported PHP versions, build array of PHP versions actually
 # installed on the system via brew
@@ -122,7 +129,7 @@ if [[ " ${brew_array[*]} " == *"$target_version"* ]]; then
                 # If apache module string within apache conf
                 if grep -q "$apache_module_string" "$apache_conf_path"; then
                     # Comment out the Apache module string if not done already
-                    sed -i.bak "/^$apache_module_string/s/^.*\$/#&/" "$apache_conf_path"
+                    sed -i.bak "/^$(sed_escape "$apache_module_string")/s/^.*\$/#&/" "$apache_conf_path"
                 else
                     # The string for the php module is not in the Apache config
                     # Add it after rewrite_module, which is expected to be the last
@@ -137,7 +144,7 @@ if [[ " ${brew_array[*]} " == *"$target_version"* ]]; then
             # Enable target PHP version
             read -r php_module apache_php_lib_path < <(apache_module_and_lib "$target_version")
             apache_php_mod_path="$php_opt_path$php_version$apache_php_lib_path"
-            sed -i.bak -E "s/^#(LoadModule $php_module $apache_php_mod_path)/\1/" "$apache_conf_path"
+            sed -i.bak -E "s/^#(LoadModule $php_module $(sed_escape "$apache_php_mod_path"))/\1/" "$apache_conf_path"
 
             # Cleanup sed backup file
             [[ -e "${apache_conf_path}.bak" ]] && rm "${apache_conf_path}.bak"

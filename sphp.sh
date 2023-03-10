@@ -102,18 +102,16 @@ apache_change=1
 apache_conf_path="$homebrew_path/etc/httpd/httpd.conf"
 apache_php_mod_path="$php_opt_path$php_version$apache_php_lib_path"
 
-# Build 2 arrays from the list of supported PHP versions:
-# - php_array: PHP version numbers prefixed by 'php@'
-# - php_installed_array: PHP versions actually installed on the system via brew
+# From the list of supported PHP versions, build array of PHP versions actually
+# installed on the system via brew
 for version in ${brew_array[*]}; do
-    php_array+=("php@${version}")
     if [[ -d "$homebrew_path/etc/php/$version" ]]; then
         php_installed_array+=("$version")
     fi
 done
 
 # Check that the requested version is supported
-if [[ " ${php_array[*]} " == *"$php_version"* ]]; then
+if [[ " ${brew_array[*]} " == *"$target_version"* ]]; then
     # Check that the requested version is installed
     if [[ " ${php_installed_array[*]} " == *"$target_version"* ]]; then
 
@@ -129,11 +127,12 @@ if [[ " ${php_array[*]} " == *"$php_version"* ]]; then
         if [[ $apache_change -eq 1 ]]; then
             echo "Switching your apache conf"
 
-            for j in "${php_installed_array[@]}"; do
+            for version in "${php_installed_array[@]}"; do
                 # Get PHP Module and Apache lib path for PHP version
-                read -r loop_php_module loop_apache_php_lib_path < <(apache_module_and_lib "$j")
+                read -r loop_php_module loop_apache_php_lib_path < <(apache_module_and_lib "$version")
 
-                apache_module_string="LoadModule $loop_php_module $php_opt_path$j$loop_apache_php_lib_path"
+                loop_php_version="php@$version"
+                apache_module_string="LoadModule $loop_php_module $php_opt_path$loop_php_version$loop_apache_php_lib_path"
                 comment_apache_module_string="#$apache_module_string"
 
                 # If apache module string within apache conf

@@ -25,6 +25,8 @@ php_modules[8]="php_module"
 apache_lib_paths[5]="\/lib\/httpd\/modules\/libphp5.so"
 apache_lib_paths[7]="\/lib\/httpd\/modules\/libphp7.so"
 apache_lib_paths[8]="\/lib\/httpd\/modules\/libphp.so"
+osx_native_lib_paths[5]="libexec\/apache2\/libphp5.so"
+osx_native_lib_paths[7]="libexec\/apache2\/libphp7.so"
 
 
 # ----------------------------------------------------------------------------
@@ -94,9 +96,9 @@ brew_prefix=$(brew --prefix | sed 's#/#\\\/#g')
 php_opt_path="$brew_prefix\/opt\/"
 
 if [[ $(osx_version) -ge 101300 ]]; then
-    native_osx_php_apache_module="LoadModule ${php_modules[7]} libexec\/apache2\/libphp7.so"
+    osx_php_version=7
 else
-    native_osx_php_apache_module="LoadModule ${php_modules[5]} libexec\/apache2\/libphp5.so"
+    osx_php_version=5
 fi
 
 
@@ -141,8 +143,9 @@ if [[ " ${brew_array[*]} " == *"$target_version"* ]]; then
                     fi
                 # Else the string for the php module is not in the apache config then add it
                 else
+                    native_osx_php_apache_module="LoadModule ${php_modules[$osx_php_version]} ${osx_native_lib_paths[$osx_php_version]}"
                     sed -i.bak "/$native_osx_php_apache_module/a\\
-$comment_apache_module_string\\
+#$apache_module_string\\
 " "$apache_conf_path"
                 fi
             done

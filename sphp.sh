@@ -89,6 +89,7 @@ if [[ -z "$target_version" ]]; then
 fi
 
 homebrew_path=$(brew --prefix)
+apache_conf_path="$homebrew_path/etc/httpd/httpd.conf"
 brew_prefix=$(brew --prefix | sed 's#/#\\\/#g')
 php_opt_path="$brew_prefix\/opt\/"
 
@@ -98,11 +99,6 @@ else
     native_osx_php_apache_module="LoadModule ${php_modules[5]} libexec\/apache2\/libphp5.so"
 fi
 
-# Get PHP Module and Apache lib path for PHP version
-read -r php_module apache_php_lib_path < <(apache_module_and_lib "$target_version")
-
-apache_conf_path="$homebrew_path/etc/httpd/httpd.conf"
-apache_php_mod_path="$php_opt_path$php_version$apache_php_lib_path"
 
 # From the list of supported PHP versions, build array of PHP versions actually
 # installed on the system via brew
@@ -150,7 +146,12 @@ $comment_apache_module_string\\
 " "$apache_conf_path"
                 fi
             done
+
+            # Enable target PHP version
+            read -r php_module apache_php_lib_path < <(apache_module_and_lib "$target_version")
+            apache_php_mod_path="$php_opt_path$php_version$apache_php_lib_path"
             sed -i.bak "s/\#LoadModule $php_module $apache_php_mod_path/LoadModule $php_module $apache_php_mod_path/g" "$apache_conf_path"
+
             echo "Restarting apache"
             brew services restart httpd
         fi

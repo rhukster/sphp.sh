@@ -152,8 +152,7 @@ $comment_apache_module_string\\
             done
             sed -i.bak "s/\#LoadModule $php_module $apache_php_mod_path/LoadModule $php_module $apache_php_mod_path/g" "$apache_conf_path"
             echo "Restarting apache"
-            brew services stop httpd
-            brew services start httpd
+            brew services restart httpd
         fi
 
         echo

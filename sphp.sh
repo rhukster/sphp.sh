@@ -127,22 +127,20 @@ if [[ " ${brew_array[*]} " == *"$target_version"* ]]; then
         if [[ $apache_change -eq 1 ]]; then
             echo "Switching your apache conf"
 
+            # Disable module for any PHP version other than target
             for version in "${php_installed_array[@]}"; do
                 # Get PHP Module and Apache lib path for PHP version
                 read -r loop_php_module loop_apache_php_lib_path < <(apache_module_and_lib "$version")
 
                 loop_php_version="php@$version"
                 apache_module_string="LoadModule $loop_php_module $php_opt_path$loop_php_version$loop_apache_php_lib_path"
-                comment_apache_module_string="#$apache_module_string"
 
                 # If apache module string within apache conf
                 if grep -q "$apache_module_string" "$apache_conf_path"; then
-                    # If apache module string not commented out already
-                    if ! grep -q "$comment_apache_module_string" "$apache_conf_path"; then
-                        sed -i.bak "s/$apache_module_string/$comment_apache_module_string/g" "$apache_conf_path"
-                    fi
-                # Else the string for the php module is not in the apache config then add it
+                    # Comment out the Apache module string if not done already
+                    sed -i.bak "/^$apache_module_string/s/^.*\$/#&/" "$apache_conf_path"
                 else
+                    # The string for the php module is not in the apache config then add it
                     native_osx_php_apache_module="LoadModule ${php_modules[$osx_php_version]} ${osx_native_lib_paths[$osx_php_version]}"
                     sed -i.bak "/$native_osx_php_apache_module/a\\
 #$apache_module_string\\
@@ -153,7 +151,10 @@ if [[ " ${brew_array[*]} " == *"$target_version"* ]]; then
             # Enable target PHP version
             read -r php_module apache_php_lib_path < <(apache_module_and_lib "$target_version")
             apache_php_mod_path="$php_opt_path$php_version$apache_php_lib_path"
-            sed -i.bak "s/\#LoadModule $php_module $apache_php_mod_path/LoadModule $php_module $apache_php_mod_path/g" "$apache_conf_path"
+            sed -i.bak -E "s/^#(LoadModule $php_module $apache_php_mod_path)/\1/" "$apache_conf_path"
+
+            # Cleanup sed backup file
+            [[ -e "${apache_conf_path}.bak" ]] && rm "${apache_conf_path}.bak"
 
             echo "Restarting apache"
             brew services restart httpd

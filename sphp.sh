@@ -45,7 +45,7 @@ fi
 php_module="$php5_module"
 apache_php_lib_path="$apache_php5_lib_path"
 
-simple_php_version=$(echo "$php_version" | sed 's/^php@//' | sed 's/\.//')
+simple_php_version="${php_version//[^0-9]/}"
 if [[ simple_php_version -ge 70 && simple_php_version -lt 80 ]]; then
     php_module="$php7_module"
     apache_php_lib_path="$apache_php7_lib_path"
@@ -60,8 +60,8 @@ apache_php_mod_path="$php_opt_path$php_version$apache_php_lib_path"
 
 # What versions of php are installed via brew
 for i in "${php_array[@]}"; do
-    version=$(echo "$i" | sed 's/^php@//')
-    if [[ -d "$homebrew_path/etc/php/$version" ]]; then
+    version="${i#php@}"
+    if [[ -d "${homebrew_path}/etc/php/${version}" ]]; then
         php_installed_array+=("$i")
     fi
 done
@@ -86,7 +86,7 @@ if [[ " ${php_array[*]} " == *"$php_version"* ]]; then
             for j in "${php_installed_array[@]}"; do
                 loop_php_module="$php5_module"
                 loop_apache_php_lib_path="$apache_php5_lib_path"
-                loop_php_version=$(echo "$j" | sed 's/^php@//' | sed 's/\.//')
+                loop_php_version="${j//[^0-9]/}"
                 if [[ loop_php_version -ge 70 && loop_php_version -lt 80 ]]; then
                     loop_php_module="$php7_module"
                     loop_apache_php_lib_path="$apache_php7_lib_path"

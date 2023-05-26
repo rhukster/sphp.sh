@@ -1,17 +1,21 @@
 #!/bin/bash
-# Creator: Phil Cook
-# Modified: Andy Miller
-# More information: https://github.com/rhukster/sphp.sh
+#
+# Switch between Brew-installed PHP versions.
+#
+# AUTHOR        :Phil Cook
+# AUTHOR        :Andy Miller
+# DOCS          :https://github.com/rhukster/sphp.sh
+# DEPENDS       :brew
 
 osx_major_version=$(sw_vers -productVersion | cut -d. -f1)
 osx_minor_version=$(sw_vers -productVersion | cut -d. -f2)
 osx_patch_version=$(sw_vers -productVersion | cut -d. -f3)
 osx_patch_version=${osx_patch_version:-0}
-osx_version=$((${osx_major_version} * 10000 + ${osx_minor_version} * 100 + ${osx_patch_version}))
+osx_version=$((osx_major_version * 10000 + osx_minor_version * 100 + osx_patch_version))
 homebrew_path=$(brew --prefix)
-brew_prefix=$(brew --prefix | sed 's#/#\\\/#g')
+brew_prefix=$(brew --prefix | sed 's#/#\\/#g')
 
-brew_array=("5.6","7.0","7.1","7.2","7.3","7.4","8.0","8.1","8.2")
+brew_array=("5.6" "7.0" "7.1" "7.2" "7.3" "7.4" "8.0" "8.1" "8.2")
 php_array=("php@5.6" "php@7.0" "php@7.1" "php@7.2" "php@7.3" "php@7.4" "php@8.0" "php@8.1" "php@8.2")
 php_installed_array=()
 php_version="php@$1"
@@ -29,11 +33,11 @@ if [ "${osx_version}" -ge "101300" ]; then
     native_osx_php_apache_module="LoadModule ${php7_module} libexec\/apache2\/libphp7.so"
 fi
 
-# Has the user submitted a version required
+# Has the user submitted a version required?
 if [[ -z "$1" ]]; then
     echo "usage: sphp version [-s|-s=*] [-c=*]"
     echo
-    echo "    version    one of:" ${brew_array[@]}
+    echo "    version    one of: ${brew_array[*]}"
     echo
     exit
 fi
@@ -55,7 +59,7 @@ apache_conf_path="$homebrew_path/etc/httpd/httpd.conf"
 apache_php_mod_path="$php_opt_path$php_version$apache_php_lib_path"
 
 # What versions of php are installed via brew
-for i in ${php_array[*]}; do
+for i in "${php_array[@]}"; do
     version=$(echo "$i" | sed 's/^php@//')
     if [[ -d "$homebrew_path/etc/php/$version" ]]; then
         php_installed_array+=("$i")
@@ -79,7 +83,7 @@ if [[ " ${php_array[*]} " == *"$php_version"* ]]; then
         if [[ $apache_change -eq 1 ]]; then
             echo "Switching your apache conf"
 
-            for j in ${php_installed_array[@]}; do
+            for j in "${php_installed_array[@]}"; do
                 loop_php_module="$php5_module"
                 loop_apache_php_lib_path="$apache_php5_lib_path"
                 loop_php_version=$(echo "$j" | sed 's/^php@//' | sed 's/\.//')

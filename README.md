@@ -1,10 +1,13 @@
 # sphp.sh
 
-Shell script for switching between Brew-installed PHP versions as featured in the popular [macOS Apache + PHP series](https://getgrav.org/blog/macos-ventura-apache-multiple-php-versions) on https://getgrav.org.
+Shell script for switching between Brew-installed PHP versions, as featured in the popular
+[macOS Apache + PHP series](https://getgrav.org/blog/macos-ventura-apache-multiple-php-versions)
+on https://getgrav.org.
 
-This is ported from the gist: https://gist.github.com/rhukster/f4c04f1bf59e0b74e335ee5d186a98e2
+The code has been moved from the
+[original gist](https://gist.github.com/rhukster/f4c04f1bf59e0b74e335ee5d186a98e2)
+to a proper repository, to better allow for pull requests and issues.
 
-It has been moved to a proper repo to better allow for pull requests and issues.
 
 ## Installation
 
@@ -57,3 +60,19 @@ Zend Engine v4.2.3, Copyright (c) Zend Technologies
 
 All done!
 ```
+
+
+## Support
+
+Submit a [new bug report](https://github.com/rhukster/sphp.sh/issues/new/choose)
+on the [Github repository](https://github.com/rhukster/sphp.sh).
+
+All code contributions (bug fixes, new features and enhancements) are welcome.
+Please submit a [Pull Request](https://github.com/rhukster/sphp.sh/compare).
+
+
+## License and Copyright
+
+Copyright (c) 2023 Andy Miller
+
+Released under the [MIT License](LICENSE)

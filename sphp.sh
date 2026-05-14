@@ -21,6 +21,9 @@ script_version=1.2.0
 # Use macOS native grep to avoid GNU grep >=3.8 warnings (see #1).
 grep() { /usr/bin/grep "$@"; }
 
+# Use macOS native sed to avoid No such file or directory error with GNU sed (see #19)
+sed() { /usr/bin/sed "$@"; }
+
 # Print "<module> <lib_path>" for the given PHP version (X.Y or php@X.Y).
 # Covers PHP 5/7/8 and forward-compatible for 9+ (assumed to keep the 8.x layout).
 apache_module_and_lib() {

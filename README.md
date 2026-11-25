@@ -4,6 +4,9 @@ Shell script for switching between Brew-installed PHP versions, as featured in t
 [macOS Apache + PHP series](https://getgrav.org/blog/macos-ventura-apache-multiple-php-versions)
 on https://getgrav.org.
 
+> [!NOTE]
+> sphp.sh was intended to switch PHP versions with brew installed Apache.  **Reeve is a Rust TUI** to manage this automatically and supports Apache, Nginx, and Caddy servers, vhosts, local SSL, directory parking, php modules, mailpit, databases and more. Check it out on [Github](https://github.com/yetidevworks/reeve) or on [yetidevworks.com](https://yetidevworks.com/reeve)
+
 The code has been moved from the
 [original gist](https://gist.github.com/rhukster/f4c04f1bf59e0b74e335ee5d186a98e2)
 to a proper repository, to better allow for pull requests and issues.

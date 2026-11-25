@@ -11,7 +11,7 @@
 
 set -euo pipefail
 
-script_version=1.2.0
+script_version=1.2.1
 
 
 # ----------------------------------------------------------------------------
@@ -95,6 +95,19 @@ discover_installed() {
     shopt -u nullglob
 }
 
+# Resolve the real keg name behind opt/php@X.Y. The newest PHP is installed as
+# formula "php" (php@X.Y is only an alias whose opt/ link points into
+# Cellar/php/), and brew link/unlink don't reliably resolve that alias (see #12).
+keg_name() {
+    local target
+    target=$(readlink "$homebrew_path/opt/$1" || true)
+    if [[ -n $target ]]; then
+        basename "$(dirname "$target")"
+    else
+        echo "$1"
+    fi
+}
+
 
 # ----------------------------------------------------------------------------
 # Main
@@ -155,9 +168,9 @@ fi
 echo "Switching to $php_version"
 echo "Switching your shell"
 for v in "${installed[@]}"; do
-    brew unlink "php@$v" >/dev/null
+    brew unlink "$(keg_name "php@$v")" >/dev/null
 done
-brew link --force "$php_version"
+brew link --force "$(keg_name "$php_version")"
 
 # Switch Apache.
 if (( apache_change == 1 )); then
